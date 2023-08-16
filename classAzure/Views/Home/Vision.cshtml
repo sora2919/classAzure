@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+圖片辨識
+<div class="container">
+    <div class="form-group">
+        <label class="form-label">網址:</label>
+        <input id="imageUrl" type="text" class="form-control" value="" />
+    </div>
+    <div class="form-group">
+        <img id="imgPreview" src="" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" onclick="anlyzeImage()">辨識</button>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        function anlyzeImage() {
+            $("#imgPreview").attr("src", $("#imageUrl").val());
+           var params = {
+               // Request parameters
+               "visualFeatures": "Description,Tags",
+               // "details": "{string}",
+               "language": "en",
+               "model-version": "latest",
+           };
+            var data = { url: $("#imageUrl").val() };
+
+           $.ajax({
+               url: "https://msit150team02vision.cognitiveservices.azure.com/vision/v3.2/analyze?" + $.param(params),
+               beforeSend: function(xhrObj){
+                   // Request headers
+                   xhrObj.setRequestHeader("Content-Type","application/json");
+                   xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", "e1b7bcaed4494328a9dc6ab2c461f893");
+               },
+               type: "POST",
+               // Request body
+               data: JSON.stringify(data),
+           })
+           .done(function(data) {
+                    // alert(JSON.stringify(data));
+               var text = data['description']['captions'][0]['text'];
+                    var confidence = data['description']['captions'][0]['confidence'];
+                    alert(`內容:${text},信心指數:${(confidence*100).toFixed(2)}%`);
+           })
+           .fail(function() {
+               alert("error");
+           });
+           }
+    </script>
+}
