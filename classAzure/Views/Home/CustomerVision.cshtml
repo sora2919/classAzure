@@ -5,10 +5,10 @@
 <div class="container">
     <div class="form-group">
         <label class="form-label">檔案上傳:</label>
-        <input id="imageUpload" type="file" accept="image/*" class="form-control"/>
+        <input id="imageUpload" type="file" accept="image/*" class="form-control" />
     </div>
     <div class="form-group">
-        <img id="imgPreview" src="~/images/noimage.png" width="20%" height="20%"/>
+        <img id="imgPreview" src="~/images/noimage.png" width="20%" height="20%" />
     </div>
 
     <div class="form-group">
@@ -25,9 +25,9 @@
             var allowFileType = "image.*";
             if (file.type.match(allowFileType)) {
                 var reader = new FileReader();
-                reader.onload = function () { 
+                reader.onload = function () {
                     arrayBuffer = this.result;
-                    var blob = new Blob([arrayBuffer], {type:"image/jpeg"});
+                    var blob = new Blob([arrayBuffer], { type: "image/jpeg" });
                     var urlCreator = window.URL || window.webkitURL;
                     var objectUrl = urlCreator.createObjectURL(blob);
                     $("#imgPreview").attr("src", objectUrl);
@@ -39,36 +39,25 @@
             }
         })
         function anlyzeImage() {
-            // $("#imgPreview").attr("src", $("#imageUrl").val());
-            var params = {
-                // Request parameters
-                "visualFeatures": "Description,Tags",
-                // "details": "{string}",
-                "language": "en",
-                "model-version": "latest",
-            };
-            var data = { url: $("#imageUrl").val() };
-
             $.ajax({
-                url: "https://msit150team02vision.cognitiveservices.azure.com/vision/v3.2/analyze?" + $.param(params),
+                url: "https://msit150robot-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/e9443028-2c31-4ef0-ab32-84acc718be51/classify/iterations/Iteration1/image"/*  + $.param(params) */,
                 beforeSend: function (xhrObj) {
                     // Request headers
                     xhrObj.setRequestHeader("Content-Type", "application/octet-stream");//application : 代表二進位相關 application/octet-stream二進位預設值
-                    xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", "e1b7bcaed4494328a9dc6ab2c461f893");
+                    xhrObj.setRequestHeader("Prediction-Key", "47e874b5748149a5b37a6ad8076b8d81");
                 },
                 type: "POST",
                 // Request body
-                processData:false,//不要加做處理(因為已經把他轉成二進位了)
+                processData: false,//不要加做處理(因為已經把他轉成二進位了)
                 data: arrayBuffer,
             })
                 .done(function (data) {
-                    alert(JSON.stringify(data));
-                    // var text = data['description']['captions'][0]['text'];
-                    // var confidence = data['description']['captions'][0]['confidence'];
-                    // alert(`內容:${text},信心指數:${(confidence * 100).toFixed(2)}%`);
+                    var tagName = data['predictions'][0]['tagName'];
+                    var confidence = data['predictions'][0]['probability'];
+                    alert(`內容:${tagName},信心指數${confidence * 100}`)
                 })
-                .fail(function () {
-                    alert("error");
+                .fail(function (err) {
+                    alert(err.statusText);
                 });
         }
     </script>
